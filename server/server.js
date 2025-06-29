@@ -4,6 +4,7 @@ import 'dotenv/config'
 import bcrypt from "bcrypt"; 
 import User from "./Schema/User.js"; 
 import { nanoid } from 'nanoid';
+import jwt from "jsonwebtoken"
 
 const app = express(); 
 let PORT = 3000 ; 
@@ -27,6 +28,16 @@ mongoose.connection.once('open', async () => {
 
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
+
+const formatDataToSend = (user) =>{
+    const access_token = jwt.sign({ id : user._id} , process.env.SECRET_KEY)
+    return {
+        access_token ,
+        profile_img : user.personal_info.profile_img , 
+        username : user.personal_info.username,
+        fullName : user.personal_info.fullName
+    }
+}
 
 const generateUsername = async(email) =>{
     let username = email.split("@")[0]; 
@@ -64,7 +75,7 @@ app.post("/signup", async (req, res) => {
         });
 
         const savedUser = await user.save();
-        return res.status(200).json({ user: savedUser });
+        return res.status(200).json({ user: formatDataToSend(savedUser) });
 
     } catch (err) {
         if (err.code === 11000) {
@@ -73,6 +84,32 @@ app.post("/signup", async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 });
+
+app.post("/signin" , (req, res) =>{
+    const {email , password} = req.body ; 
+    User.findOne({"personal_info.email" : email})
+    .then((user) => {
+        if(!user){
+            return res.status(403).json({error : "email not found"})
+        }
+        bcrypt.compare(password , user.personal_info.password, (err, result) =>{
+            if(err){
+                return res.status(403).json("Error occured while login. Please Try Again later")
+            }
+            if(!result){
+                return res.status(403).json({error : "Incorrect password"}); 
+            }
+            else{
+                return res.status(200).json(formatDataToSend(user)) ; 
+            }
+        })
+        console.log(user);
+    })
+    .catch(error => {
+        console.log(error);
+        return res.status(403).json({error : error.message})
+    })
+})
 
 app.listen(PORT , () => {
     console.log("listening to port : " + PORT);
