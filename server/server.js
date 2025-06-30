@@ -5,11 +5,13 @@ import bcrypt from "bcrypt";
 import User from "./Schema/User.js"; 
 import { nanoid } from 'nanoid';
 import jwt from "jsonwebtoken"
+import cors from "cors"; 
 
 const app = express(); 
 let PORT = 3000 ; 
 
 app.use(express.json()); 
+app.use(cors()); 
 
 mongoose.connect(process.env.MONGODB_URI , {
     autoIndex : true

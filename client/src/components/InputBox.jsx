@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function InputBox({ name, type, id, value, placeholder }) {
   const renderIcon = () => {
-    if (name == "fullname") return <FaRegUser className="input-icon" />;
+    if (name == "fullName") return <FaRegUser className="input-icon" />;
     if (name === "email") return <MdOutlineEmail className="input-icon" />;
     if (name === "password") return <IoKeyOutline className="input-icon" />;
     return null;
