@@ -8,6 +8,7 @@ import { storeInSession } from "../common/session";
 import { useRef } from "react";
 import { useContext } from "react";
 import { UserContext } from "../App";
+import { authWithGoogle } from "../common/firebase";
 
 export default function UserAuthForm({ type }) {
 
@@ -58,8 +59,30 @@ export default function UserAuthForm({ type }) {
       // console.log(sessionStorage);
       setUserAuth(data); 
     })
-    .catch(({response}) => {
-      toast.error(response.data.error) ; 
+    // .catch(({response}) => {
+    //   toast.error(response.data.error) ; 
+    // })
+    .catch((err) => {
+      console.error(err);
+      const errorMessage = err.response?.data?.error || "An unexpected error occurred.";
+      toast.error(errorMessage);
+    });
+  }
+  const handleGoogleAuth = (e) =>{
+    e.preventDefault();
+    authWithGoogle()
+    .then((user) =>{
+      console.log(user);
+
+      let serverRoute = "/google-auth"; 
+      let formData = {
+        access_token: user.access_token
+      }
+      userAuthThroughServer(serverRoute , formData);
+    })
+    .catch((err) =>{
+      toast.error("trouble login with google");
+      return console.log(err);
     })
   }
   return (
@@ -88,7 +111,9 @@ export default function UserAuthForm({ type }) {
             <p>or</p>
             <hr className="w-1/2 border-black" />
           </div>
-          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center">
+          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center"
+            onClick={handleGoogleAuth}
+          >
             <img src={googleIcon} className="w-5" />
             Continue with Google
           </button>

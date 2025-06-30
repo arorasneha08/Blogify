@@ -9,7 +9,13 @@ const UserNavigationPanel = () => {
     const {userAuth : {username} , setUserAuth} = useContext(UserContext); 
     const signOutUser = () => {
         removeFromSession("user"); 
-        setUserAuth({access_token : null})
+        // setUserAuth({access_token : null})
+        setUserAuth({
+            access_token: null,
+            profile_img: null,
+            username: null,
+            fullName: null
+        });
     }
     return (
     <AnimationWrapper transition={{ duration : 0.2}} className="absolute right-0 z-50">

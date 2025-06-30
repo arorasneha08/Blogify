@@ -11,7 +11,16 @@ import UserNavigationPanel from "./UserNavigationPanel";
 export default function Navbar() {
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
   const {userAuth , userAuth : {access_token , profile_img}} = useContext(UserContext); 
-  
+  const[userNavPanel , setUserNavPanel] = useState(false) ; 
+
+  const handleUserNavPanel = () =>{
+    setUserNavPanel(currentVal => !currentVal);
+  }
+  const handleBlur = () =>{
+    setTimeout(() =>{
+      setUserNavPanel(false); 
+    }, 200);
+  }
   return (
     <>
     <nav className="navbar flex items-center p-4 relative">
@@ -52,11 +61,12 @@ export default function Navbar() {
               <SlBell className="text-2xl ml-3"/>
             </button>
           </Link>
-          <div className="relative">
+          <div className="relative" onClick={handleUserNavPanel} onBlur={handleBlur}>
             <button className="w-12 h-12 mt-1">
               <img src={profile_img} className="w-full h-full object-cover rounded-full"/>
             </button>
-            <UserNavigationPanel/>
+            {userNavPanel ? <UserNavigationPanel/> : ""}
+            
           </div>
         </>
          :

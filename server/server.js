@@ -1,4 +1,4 @@
-import express from 'express' ;
+import express, { json } from 'express' ;
 import mongoose from 'mongoose';
 import 'dotenv/config'
 import bcrypt from "bcrypt"; 
@@ -6,9 +6,21 @@ import User from "./Schema/User.js";
 import { nanoid } from 'nanoid';
 import jwt from "jsonwebtoken"
 import cors from "cors"; 
+import admin from "firebase-admin" ; 
+import {getAuth} from "firebase-admin/auth"
+// import serviceAccountKey from "./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json" assert {type : json}
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const serviceAccountKey = require("./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json");
+
 
 const app = express(); 
 let PORT = 3000 ; 
+
+admin.initializeApp({
+    credential : admin.credential.cert(serviceAccountKey)
+}); 
 
 app.use(express.json()); 
 app.use(cors()); 
@@ -110,6 +122,48 @@ app.post("/signin" , (req, res) =>{
     .catch(error => {
         console.log(error);
         return res.status(403).json({error : error.message})
+    })
+})
+
+app.post("/google-auth" , async(req, res)=>{
+    let {access_token} = req.body ; 
+
+    getAuth().verifyIdToken(access_token)
+
+    .then(async (decodedUser) => {
+        let {email , name , picture} = decodedUser;
+        // small resolution to high resolution 
+        picture = picture.replace("s96-c" , "s384-c");
+        let user = await User.findOne({"personal_info.email" : email}).select("personal_info.fullName personal_info.username personal_info.profile_img google_auth")
+        .then((u) => {
+            return u || null; 
+        })
+        .catch((error) => {
+            return res.status(500).json({"error" : error.message})
+        })
+        if(user){
+            if(!user.google_auth){
+                return res.status(403).json({"error" : "This email was signed up without google. Please log in with password to access the account "})
+            }
+        }
+        else{
+            let username = await generateUsername(email); 
+            user = new User({
+                personal_info : {fullName : name , email , username},
+                google_auth : true
+            })
+            await user.save()
+            .then((u) =>{
+                user = u ; 
+            })
+            .catch((error) =>{
+                return res.status(500).json({"error" : error.message})
+            })
+        }
+        return res.status(200).json(formatDataToSend(user));
+    })
+    .catch((err) =>{
+        return res.status(500).json({"error" : "Authentication failed using google"})
     })
 })
 
