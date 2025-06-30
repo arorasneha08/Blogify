@@ -1,11 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import InputBox from "../components/InputBox";
 import googleIcon from "../imgs/google.png";
 import AnimationWrapper from "../common/page-animation";
 import {Toaster , toast} from "react-hot-toast"
 import axios from "axios" ; 
+import { storeInSession } from "../common/session";
+import { useRef } from "react";
+import { useContext } from "react";
+import { UserContext } from "../App";
 
 export default function UserAuthForm({ type }) {
+
+  const authForm = useRef(); 
+  let {userAuth : {access_token} , setUserAuth} = useContext(UserContext); 
+  console.log(access_token);
 
   const handleSubmit = (e) =>{
     e.preventDefault(); 
@@ -46,12 +54,18 @@ export default function UserAuthForm({ type }) {
     axios.post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute , formData)
     .then(({data}) => {
       console.log(data);
+      storeInSession("user" , JSON.stringify(data)); 
+      // console.log(sessionStorage);
+      setUserAuth(data); 
     })
     .catch(({response}) => {
       toast.error(response.data.error) ; 
     })
   }
   return (
+    access_token ? 
+    <Navigate  to="/" /> 
+    : 
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center">
         <Toaster/>
