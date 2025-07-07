@@ -11,9 +11,8 @@ import {getAuth} from "firebase-admin/auth"
 // import serviceAccountKey from "./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json" assert {type : json}
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-
 const serviceAccountKey = require("./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json");
-
+import aws from "aws-sdk" ; 
 
 const app = express(); 
 let PORT = 3000 ; 
@@ -28,6 +27,24 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI , {
     autoIndex : true
 })
+
+// setting up the s3 bucket 
+const s3 = new aws.S3({
+    region : 'us-east-1',
+    accessKeyId : process.env.AWS_ACCESS_KEY, 
+    secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY,
+})
+
+const generateUploadUrl = async (ContentType = "image/jpeg") =>{
+    const date = new Date(); 
+    const imageName = `${nanoid()}-${date}.jpeg`; 
+    return await s3.getSignedUrlPromise('putObject' , {
+        Bucket : 'blog-app-792172459205' , 
+        Key : imageName , 
+        Expires : 1000, 
+        ContentType : ContentType,
+    }) 
+}
 
 mongoose.connection.once('open', async () => {
   try {
@@ -61,6 +78,16 @@ const generateUsername = async(email) =>{
     usernameExists ? username += nanoid().substring(0 , 5) : ""; 
     return username ; 
 }
+
+app.get("/get-upload-url" , (req , res) => {
+    const type = req.query.type || "image/jpeg" ; 
+    generateUploadUrl(type)
+    .then(url => res.status(200).json({uploadURL : url}))
+    .catch(error => {
+        console.log(error.message);
+        return res.status(500).json({error : error.message}); 
+    })
+})
 
 app.post("/signup", async (req, res) => {
     try {
