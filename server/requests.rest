@@ -15,4 +15,29 @@
 #     "password" : "Sneha123@"
 # }
 
-GET http://localhost:3000/get-upload-url 
+# GET http://localhost:3000/get-upload-url 
+
+# POST http://localhost:3000/signup
+# Content-Type: application/json
+
+# {
+#     "fullName" : "john",
+#     "email" : "john@gmail.com",
+#     "password" : "John45@"
+# }
+
+# access token :- eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmMwMWM5MDA1Y2E3Y2M0ZTMzODQ2MCIsImlhdCI6MTc1MTkwODgwOX0.dLfJrEGbWoGW434p9iOSIjLyVk1mVVXW6HilBjYVbQs
+
+POST http://localhost:3000/create-blog
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmMwMWM5MDA1Y2E3Y2M0ZTMzODQ2MCIsImlhdCI6MTc1MTkwODgwOX0.dLfJrEGbWoGW434p9iOSIjLyVk1mVVXW6HilBjYVbQs
+
+{
+    "title" : "test title @ 12 # 89 andkjs 920 ",
+    "banner" : "https://example.com/imag-url",
+    "des" : "this is des", 
+    "content": {
+        "blocks" : [1, 2]
+    },
+    "tags" : ["tags1" , "tag2"]
+}

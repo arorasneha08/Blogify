@@ -13,6 +13,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const serviceAccountKey = require("./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json");
 import aws from "aws-sdk" ; 
+import Blog from './Schema/Blog.js';
 
 const app = express(); 
 let PORT = 3000 ; 
@@ -77,6 +78,23 @@ const generateUsername = async(email) =>{
 
     usernameExists ? username += nanoid().substring(0 , 5) : ""; 
     return username ; 
+}
+
+const verifyJWT = (req , res , next) => {
+    const authHeader = req.headers['authorization']; // Authorization: Bearer <JWT_TOKEN>
+    const token = authHeader && authHeader.split(" ")[1]; // authHeader.split(" ") returns ["Bearer", "<token>"] , [1] picks the token part.
+
+    if(token == null){
+        return res.status(401).json({error : "No access token"}); 
+    }
+
+    jwt.verify(token , process.env.SECRET_KEY , (err , user) => {
+        if(err){
+            return res.status(403).json({error : "Access token is invalid"}); 
+        }
+        req.user = user.id ; // If verification succeeds, the user's ID is attached to the request object (req.user) for use in the next handler
+        next(); // Passes control to the next middleware or route handler (/create-blog in your case).
+    })
 }
 
 app.get("/get-upload-url" , (req , res) => {
@@ -191,6 +209,60 @@ app.post("/google-auth" , async(req, res)=>{
     })
     .catch((err) =>{
         return res.status(500).json({"error" : "Authentication failed using google"})
+    })
+})
+
+app.post("/create-blog" , verifyJWT , (req, res) => {
+    // console.log(req.body);
+    // res.json(req.body); 
+
+    let authorId = req.user; 
+    let {title , des , banner , tags , content , draft} = req.body ; 
+    if(!title.length){
+        return res.status(403).json({error : "You must provide a title to publish the blog"}); 
+    }
+    if(!des.length || des.length > 200){
+        return res.status(403).json({error : "You must provide the blog description under 200 characters"}); 
+    }
+    if(!banner.length){
+        return res.status(403).json({error : "You must provide the banner to publish it"}); 
+    }
+    if(!content.blocks.length){
+        return res.status(403).json({error : "There must be some blog content to publish it"});
+    }
+    if(!tags.length || tags.length > 10){
+        return res.status(403).json({error : "Provide tags in order to publish the blog, Maximum 10"});
+    }
+    tags = tags.map((tag) => {
+        return tag.toLowerCase();
+    })
+    // replace the special characters with spaces and replace the spaces with hyphen 
+    let blog_id = title.replace(/[^a-zA-Z0-9]/g , ' ').replace(/\s+/g , "-").trim() + nanoid(); 
+    console.log(blog_id);
+
+    let blog = new Blog({
+        title , des , banner , content , tags ,
+        author : authorId , 
+        blog_id , 
+        draft : Boolean(draft)
+    })
+    blog.save()
+    .then((blog) => {
+        let incrementVal = draft ? 0 : 1 ; 
+        User.findOneAndUpdate(
+            { _id : authorId} , 
+            { $inc : {"account_info.total_posts" : incrementVal} , 
+            $push : {"blogs" : blog._id}}
+        )
+        .then((user) => {
+            return res.status(200).json({id : blog.blog_id})
+        })
+        .catch((err) => {
+            res.status(500).json({error : "Failed to update the total posts number"});
+        })
+    })
+    .catch((err) => {
+        return res.status(500).json({error : err.message}); 
     })
 })
 
