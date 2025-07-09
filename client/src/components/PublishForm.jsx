@@ -53,7 +53,7 @@ const PublishForm = () =>{
     }
 
     let {userAuth : {access_token}} = useContext(UserContext);
-    let navigate = useNavigate()
+    let navigate = useNavigate();
 
     const publishBlog = (e) => {
         if(e.target.className.includes("disable")){
@@ -66,7 +66,7 @@ const PublishForm = () =>{
             return toast.error(`Write a description about your blog within ${characterLimit}`); 
         }
         if(!tags.length){
-            return toast.error("Enter at least 1 tag to help us rank your blog"); 
+            return toast.error("Enter atleast 1 tag to help us rank your blog"); 
         }
         let loadingToast = toast.loading("Publishing...."); 
         e.target.classList.add("disable"); 
