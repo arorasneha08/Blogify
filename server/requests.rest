@@ -33,15 +33,24 @@
 # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmMwMWM5MDA1Y2E3Y2M0ZTMzODQ2MCIsImlhdCI6MTc1MTkwODgwOX0.dLfJrEGbWoGW434p9iOSIjLyVk1mVVXW6HilBjYVbQs
 
 # {
-#     "title" : "test title @ 12 # 89 andkjs 920 ",
+#     "title" : "travel blog",
 #     "banner" : "https://example.com/imag-url",
-#     "des" : "this is des", 
+#     "des" : "travel blog ", 
 #     "content": {
 #         "blocks" : [1, 2]
 #     },
-#     "tags" : ["tags1" , "tag2"]
+#     "tags" : ["finances" , "travel"]
 # }
 
-GET http://localhost:3000/latest-blogs
+# GET http://localhost:3000/latest-blogs
+# # this will return the blogs 
+
+# GET http://localhost:3000/trending-blogs
 # this will return the blogs 
 
+POST http://localhost:3000/search-blogs
+Content-Type: application/json
+
+{
+    "tag" : "cooking" 
+}

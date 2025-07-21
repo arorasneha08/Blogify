@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 
+export let activetabLineRef ; 
+export let activeTabRef ; 
+
 export default function InPageNavigation({routes , defaultHidden = [],defaultActiveIdx = 0 , children}) {
     let [InPageNavIndex , setInPageNavIndex] = useState(defaultActiveIdx); 
-    let activetabLineRef = useRef();
-    let activeTabRef = useRef(); 
+    activetabLineRef = useRef();
+    activeTabRef = useRef(); 
 
     // on clicking onn the tab the black line shifts 
     const changePageState = (btn , i) => {
