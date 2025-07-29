@@ -33,13 +33,13 @@
 # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmMwMWM5MDA1Y2E3Y2M0ZTMzODQ2MCIsImlhdCI6MTc1MTkwODgwOX0.dLfJrEGbWoGW434p9iOSIjLyVk1mVVXW6HilBjYVbQs
 
 # {
-#     "title" : "travel blog",
+#     "title" : "stock market vala new blog ",
 #     "banner" : "https://example.com/imag-url",
-#     "des" : "travel blog ", 
+#     "des" : "stock market blog -2 ", 
 #     "content": {
 #         "blocks" : [1, 2]
 #     },
-#     "tags" : ["finances" , "travel"]
+#     "tags" : ["tech"]
 # }
 
 # GET http://localhost:3000/latest-blogs
