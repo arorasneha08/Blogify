@@ -1,5 +1,5 @@
 import logo from "../imgs/logo.png";
-import { Link , Outlet} from "react-router-dom";
+import { Link , Outlet, useNavigate} from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { useState } from "react";
 import { RiFileEditLine } from "react-icons/ri";
@@ -12,6 +12,7 @@ export default function Navbar() {
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
   const {userAuth , userAuth : {access_token , profile_img}} = useContext(UserContext); 
   const[userNavPanel , setUserNavPanel] = useState(false) ; 
+  let navigate = useNavigate();
 
   const handleUserNavPanel = () =>{
     setUserNavPanel(currentVal => !currentVal);
@@ -20,6 +21,14 @@ export default function Navbar() {
     setTimeout(() =>{
       setUserNavPanel(false); 
     }, 200);
+  }
+  const handleSearch = (e) => {
+    let query = e.target.value ; 
+    console.log(query);
+    
+    if(e.keyCode == 13 && query.length){
+      navigate(`/search/${query}`); 
+    }
   }
   return (
     <>
@@ -40,6 +49,7 @@ export default function Navbar() {
             type="text"
             placeholder="Search"
             className="w-full md:w-auto bg-grey p-4 pl-6 pr-14 md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12"
+            onKeyDown={handleSearch}
             />
           <FaSearch className="absolute right-4 md:left-4 top-1/2 -translate-y-1/2 text-xl text-dark-grey" />
         </div>
