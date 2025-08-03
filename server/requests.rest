@@ -48,9 +48,16 @@
 # GET http://localhost:3000/trending-blogs
 # this will return the blogs 
 
-POST http://localhost:3000/search-blogs
+# POST http://localhost:3000/search-blogs
+# Content-Type: application/json
+
+# {
+#     "tag" : "cooking" 
+# }
+
+POST http://localhost:3000/search-users
 Content-Type: application/json
 
 {
-    "tag" : "cooking" 
+    "query" : "sneha"
 }
