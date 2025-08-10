@@ -370,6 +370,20 @@ app.post("/search-users" , (req, res) => {
     })
 })
 
+app.post("/get-profile" , (req, res) => {
+    console.log(req.body);
+    let {username} = req.body ; 
+    
+    User.findOne({ "personal_info.username" : username})
+    .select("-personal_info.password -google_auth -updateAt -blogs")
+    .then((user) => {
+        return res.status(200).json(user); 
+    })
+    .catch((err) => {
+        return res.status(500).json({err : err.message}); 
+    })
+})
+
 app.listen(PORT , () => {
     console.log("listening to port : " + PORT);
 })
