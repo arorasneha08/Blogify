@@ -62,9 +62,16 @@
 #     "query" : "sneha"
 # }
 
-POST http://localhost:3000/get-profile
-Content-Type: application/json
+# POST http://localhost:3000/get-profile
+# Content-Type: application/json
 
-{
-    "username" : "sneha1056.be23"
-}
+# {
+#     "username" : "sneha1056.be23"
+# }
+
+# POST http://localhost:3000/get-blog
+# Content-Type: application/json
+
+# {
+#     "blog_id" : "My-Blog-9VlJS0zjddhUvFzo3wuBb" 
+# }
