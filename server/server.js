@@ -217,7 +217,7 @@ app.post("/create-blog" , verifyJWT , (req, res) => {
     // res.json(req.body); 
 
     let authorId = req.user; 
-    let {title , des , banner , tags , content , draft} = req.body ; 
+    let {title , des , banner , tags , content , draft , id} = req.body ; 
     
     if(!title.length){
         return res.status(403).json({error : "You must provide a title"}); 
@@ -241,33 +241,45 @@ app.post("/create-blog" , verifyJWT , (req, res) => {
         return tag.toLowerCase();
     })
     // replace the special characters with spaces and replace the spaces with hyphen 
-    let blog_id = title.replace(/[^a-zA-Z0-9]/g , ' ').replace(/\s+/g , "-").trim() + nanoid(); 
+    let blog_id = id || title.replace(/[^a-zA-Z0-9]/g , ' ').replace(/\s+/g , "-").trim() + nanoid(); 
     console.log(blog_id);
 
-    let blog = new Blog({
-        title , des , banner , content , tags ,
-        author : authorId , 
-        blog_id , 
-        draft : Boolean(draft)
-    })
-    blog.save()
-    .then((blog) => {
-        let incrementVal = draft ? 0 : 1 ; 
-        User.findOneAndUpdate(
-            { _id : authorId} , 
-            { $inc : {"account_info.total_posts" : incrementVal} , 
-            $push : {"blogs" : blog._id}}
-        )
-        .then((user) => {
-            return res.status(200).json({id : blog.blog_id})
+    if(id){
+        Blog.findOneAndUpdate({blog_id} , {title , des , banner , tags , content , draft : Boolean(draft) ? draft : false})
+        .then((blog) => {
+            return res.status(200).json({id : blog_id})
         })
         .catch((err) => {
-            res.status(500).json({error : "Failed to update the total posts number"});
+            return res.status(500).json({error : err.message}); 
         })
-    })
-    .catch((err) => {
-        return res.status(500).json({error : err.message}); 
-    })
+    }
+    else{
+        let blog = new Blog({
+            title , des , banner , content , tags ,
+            author : authorId , 
+            blog_id , 
+            draft : Boolean(draft)
+        })
+        blog.save()
+        .then((blog) => {
+            let incrementVal = draft ? 0 : 1 ; 
+            User.findOneAndUpdate(
+                { _id : authorId} , 
+                { $inc : {"account_info.total_posts" : incrementVal} , 
+                $push : {"blogs" : blog._id}}
+            )
+            .then((user) => {
+                return res.status(200).json({id : blog.blog_id})
+            })
+            .catch((err) => {
+                res.status(500).json({error : "Failed to update the total posts number"});
+            })
+        })
+        .catch((err) => {
+            return res.status(500).json({error : err.message}); 
+        })
+    }
+
 })
 
 app.post("/latest-blogs" , (req, res) => {
@@ -391,8 +403,8 @@ app.post("/get-profile" , (req, res) => {
 })
 
 app.post("/get-blog" , (req , res) => {
-    let {blog_id} = req.body ; 
-    let incrementVal = 1 ; 
+    let {blog_id , draft , mode} = req.body ; 
+    let incrementVal = mode != "edit" ?  1 : 0 ; 
 
     Blog.findOneAndUpdate({ blog_id} , {$inc : {"activity.total_reads" : incrementVal}})
     .populate("author" , "personal_info.fullName personal_info.username personal_info.profile_img")
@@ -404,6 +416,9 @@ app.post("/get-blog" , (req , res) => {
         .catch((err) => {
             return res.status(500).json({error : err.message}); 
         })
+        if(blog.draft && !draft){
+            return res.status(500).json({error : "This blog is a draft and cannot be accessed"});
+        }
         return res.status(200).json({blog});
     })
     .catch((err) => {

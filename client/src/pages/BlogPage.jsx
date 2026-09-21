@@ -99,8 +99,6 @@ export default function BlogPage() {
             }
           </div>
 
-          <BlogInteraction />
-
           {
             similarBlogs != null && similarBlogs.length ? 
             <>
