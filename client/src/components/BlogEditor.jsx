@@ -19,13 +19,14 @@ const BlogEditor = () =>{
     
     useEffect(() =>{
         // for saving as the draft check the following conditions 
-        if(!textEditor.isReady){
-            setTextEditor(new EditorJS({
+         if(!textEditor.isReady){
+            const editor = new EditorJS({
                 holderId :"textEditor" ,
                 data : content , 
                 tools : tools ,
                 placeholder : "Let's write an awesome story",  
-            }))
+            })
+            setTextEditor(editor);
         }
     }, []) ; 
 

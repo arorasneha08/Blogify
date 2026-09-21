@@ -5,7 +5,7 @@ const TrendingBlogPost = ({blog, index}) => {
     let {title , blog_id : id , author : {personal_info : {fullName, username , profile_img}} , publishedAt} = blog ;
 
     return (
-        <Link to={`/blogs/${id}`} className="flex gap-5 mb-8">
+        <Link to={`/blog/${id}`} className="flex gap-5 mb-8">
             <h1 className="blog-index">{index < 10 ? "0" + (index + 1) : index}</h1>
 
             <div>
