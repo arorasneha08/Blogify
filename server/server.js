@@ -9,6 +9,7 @@ import cors from "cors";
 import admin from "firebase-admin" ; 
 import {getAuth} from "firebase-admin/auth"
 import Notification from './Schema/Notification.js';
+import Comment from './Schema/Comment.js';
 
 // import serviceAccountKey from "./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json" assert {type : json}
 import { createRequire } from "module";
@@ -560,6 +561,184 @@ app.post("/isliked-by-user" , verifyJWT , (req, res) => {
         return res.status(500).json({error : err.message})
     })
 })
+
+// app.post("/add-comment" , verifyJWT , (req, res) => {
+//     let user_id = req.user;
+//     let {_id , comment , replying_to, blog_author} = req.body ; 
+
+//     if(!comment.length){
+//         return res.status(403).json({error : "You must provide a comment"});
+//     }
+//     let commentObj = new Comment({
+//         blog_id : _id ,
+//         blog_author,
+//         comment ,
+//         commented_by : user_id ,
+//         isReply : Boolean(replying_to)
+//     })
+//     commentObj.save()
+//     .then(commentFile => {
+//         let {comment , commentedAt , children} = commentFile; 
+//         Blog.findOneAndUpdate(
+//             {_id} , 
+//             {
+//                 $push : {
+//                     "comments" : commentFile._id
+//                 } ,
+
+//             $inc : {
+//                 "activity.total_comments" : 1 , 
+//                 "activity.total_parent_comments" : 1
+//             }
+//         })
+//         .then(blog => {
+//             let notification = new Notification({
+//                 type : "comment" ,
+//                 blog : _id , 
+//                 notification_for : blog.author ,
+//                 user : user_id,
+//                 comment : commentFile._id
+//             })
+//             notification.save()
+//             .then(notification => {
+//                 return res.status(200).json({
+//                     comment ,
+//                     commentedAt ,
+//                     _id : commentFile._id,
+//                     user_id : children,
+//                     children
+//                 });
+//             }) 
+//             .catch(err => {
+//                 return res.status(500).json({error : err.message})
+//             })
+//         })
+//         .catch(err => {
+//             return res.status(500).json({error : err.message})
+//         })
+//     })
+//     .catch(err => {
+//         return res.status(500).json({error : err.message})
+//     })
+// })
+
+app.post("/add-comment", verifyJWT, async (req, res) => {
+
+    try {
+
+        const user_id = req.user;
+
+        const {
+            _id,
+            comment,
+            replying_to,
+            blog_author
+        } = req.body;
+
+        if (!_id) {
+            return res.status(400).json({
+                error: "Blog ID is required"
+            });
+        }
+
+        if (!comment || !comment.trim()) {
+            return res.status(403).json({
+                error: "You must provide a comment"
+            });
+        }
+
+        const commentObj = new Comment({
+            blog_id: _id,
+            blog_author,
+            comment: comment.trim(),
+            commented_by: user_id,
+
+            isReply: Boolean(replying_to),
+
+            parent: replying_to || null
+        });
+
+        const commentFile = await commentObj.save();
+
+        const blog = await Blog.findOneAndUpdate(
+            { _id },
+
+            {
+                $push: {
+                    comments: commentFile._id
+                },
+
+                $inc: {
+                    "activity.total_comments": 1,
+
+                    "activity.total_parent_comments":
+                        replying_to ? 0 : 1
+                }
+            },
+
+            {
+                new: true
+            }
+        );
+
+        if (!blog) {
+            return res.status(404).json({
+                error: "Blog not found"
+            });
+        }
+
+        const notification = new Notification({
+            type: "comment",
+            blog: _id,
+            notification_for: blog.author,
+            user: user_id,
+            comment: commentFile._id
+        });
+
+        await notification.save();
+
+        return res.status(200).json({
+
+            comment: commentFile.comment,
+
+            commentedAt:
+                commentFile.commentedAt,
+
+            _id: commentFile._id,
+
+            commented_by: user_id,
+
+            children:
+                commentFile.children || []
+
+        });
+
+    } catch (err) {
+
+        console.log("ADD COMMENT ERROR:", err);
+
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+});
+
+app.post("/get-blog-comments" , (req, res) => {
+    let {blog_id , skip} = req.body ; 
+    let max_limit = 5; 
+
+    Comment.find({blog_id , isReply : false})
+    .populate("commented_by" , "personal_info.fullName personal_info.username personal_info.profile_img")
+    .skip(skip)
+    .limit(max_limit)
+    .sort({commentedAt : -1})
+    .then(comments => {
+        return res.status(200).json({comments})
+    })
+    .catch(err => {
+        return res.status(500).json({error : err.message})
+    })
+}) 
 
 app.listen(PORT , () => {
     console.log("listening to port : " + PORT);
