@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken"
 import cors from "cors"; 
 import admin from "firebase-admin" ; 
 import {getAuth} from "firebase-admin/auth"
+import Notification from './Schema/Notification.js';
+
 // import serviceAccountKey from "./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json" assert {type : json}
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -423,6 +425,139 @@ app.post("/get-blog" , (req , res) => {
     })
     .catch((err) => {
         return res.status(500).json({error : err.message}); 
+    })
+})
+
+// app.post("/like-blog" , verifyJWT , (req, res) => {
+//     let user_id = req.user; 
+//     let {_id , isLikedByUser} = req.body; 
+//     let incrementVal = isLikedByUser ? -1 : 1 ;
+
+//     Blog.findOneAndUpdate({_id} , {$inc : {"activity.total_likes" : incrementVal}})
+//     .then((blog) => {
+//         if(!isLikedByUser){
+//             let like = new Notification({
+//                 type : "like" ,
+//                 blog : _id , 
+//                 notification_for : blog.author ,
+//                 user : user_id
+//             });
+//             like.save().then(notification => {
+//                 return res.status(200).json({liked_by_user : true});
+//             })
+//         }
+//         else{
+//             Notification.findOneAndDelete({user : user_id , type : "like" , blog : _id})
+//             .then(data => {
+//                 return res.status(200).json({liked_by_user : false});
+//             })
+//             .catch(err => {
+//                 return res.status(500).json({error : err.message}); 
+//             }) 
+//         }
+//         return res.status(200).json({blog});
+//     })
+// })
+
+app.post("/like-blog", verifyJWT, async (req, res) => {
+
+    try {
+
+        const user_id = req.user;
+        const { _id, isLikedByUser } = req.body;
+
+        if (!_id) {
+            return res.status(400).json({
+                error: "Blog ID is required"
+            });
+        }
+
+        const blog = await Blog.findById(_id);
+
+        if (!blog) {
+            return res.status(404).json({
+                error: "Blog not found"
+            });
+        }
+
+
+        // USER ALREADY LIKED → UNLIKE
+        if (isLikedByUser) {
+
+            await Blog.findByIdAndUpdate(
+                _id,
+                {
+                    $inc: {
+                        "activity.total_likes": -1
+                    }
+                }
+            );
+
+            await Notification.deleteOne({
+                user: user_id,
+                type: "like",
+                blog: _id
+            });
+
+            return res.status(200).json({
+                liked_by_user: false
+            });
+        }
+
+
+        // USER HAS NOT LIKED → LIKE
+        await Blog.findByIdAndUpdate(
+            _id,
+            {
+                $inc: {
+                    "activity.total_likes": 1
+                }
+            }
+        );
+
+
+        const existingLike = await Notification.findOne({
+            user: user_id,
+            type: "like",
+            blog: _id
+        });
+
+        if (!existingLike) {
+
+            await Notification.create({
+                type: "like",
+                blog: _id,
+                notification_for: blog.author,
+                user: user_id
+            });
+
+        }
+
+        return res.status(200).json({
+            liked_by_user: true
+        });
+
+    } catch (err) {
+
+        console.log("LIKE ERROR:", err);
+
+        return res.status(500).json({
+            error: err.message
+        });
+
+    }
+});
+
+app.post("/isliked-by-user" , verifyJWT , (req, res) => {
+    let user_id = req.user; 
+    let {_id} = req.body ;
+
+    Notification.exists({ user : user_id , type : "like" , blog : _id})
+    .then(result => {
+        return res.status(200).json({result})
+    })
+    .catch(err => {
+        return res.status(500).json({error : err.message})
     })
 })
 

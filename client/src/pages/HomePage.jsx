@@ -108,11 +108,11 @@ export default function Home() {
                         blogs.results.map((blog, i) => {
                           console.log(blog + "-" + i);
                           
-                          return <>
-                          <AnimationWrapper key={i} transition={{duration : 1 , delay : i*0.1}}>
+                          return (
+                          <AnimationWrapper key={blog.blog_id} transition={{duration : 1 , delay : i*0.1}}>
                               <BlogPostCard content={blog} author={blog.author.personal_info}/>
                           </AnimationWrapper>
-                          </>
+                          )
                         }) 
                       : <NoDataMessage message="No Blogs Published" />
                     }
@@ -126,11 +126,11 @@ export default function Home() {
                       trendingBlogs.map((blog, i) => {
                         console.log(blog + "-" + i);
                         
-                        return <>
-                        <AnimationWrapper key={i} transition={{duration : 1 , delay : i*0.1}}>
+                        return (
+                        <AnimationWrapper key={blog.blog_id} transition={{duration : 1 , delay : i*0.1}}>
                             <TrendingBlogPost blog={blog} index={i}/>
                         </AnimationWrapper>
-                      </>
+                        )
                     }) 
                     :
                     <NoDataMessage message="No Trending Blogs"/>
@@ -144,7 +144,7 @@ export default function Home() {
                     <h1 className="font-medium text-xl mb-8">Stories from all interests</h1>
                     <div className="flex gap-3 flex-wrap">
                       {categories.map((category , i) => {
-                        return <button onClick={loadBlogByCategory} className={"tag" + (pageState == category ? " bg-black text-white": " ")} key={i}>{category}</button>
+                        return <button onClick={loadBlogByCategory} className={"tag" + (pageState == category ? " bg-black text-white": " ")} key={category}>{category}</button>
                       })}
                     </div>
                   </div>
@@ -160,11 +160,11 @@ export default function Home() {
                   trendingBlogs.map((blog, i) => {
                   console.log(blog + "-" + i);
                         
-                return <>
-                  <AnimationWrapper key={i} transition={{duration : 1 , delay : i*0.1}}>
+                return (
+                  <AnimationWrapper key={blog.blog_id} transition={{duration : 1 , delay : i*0.1}}>
                     <TrendingBlogPost blog={blog} index={i}/>
                   </AnimationWrapper>
-                </>
+                  )
                   }) 
                 }
               </div>
