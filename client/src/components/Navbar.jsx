@@ -32,7 +32,7 @@ export default function Navbar() {
   }
   return (
     <>
-    <nav className="navbar flex items-center p-4 relative">
+    <nav className="navbar flex items-center p-4 sticky top-0 z-50">
       <Link to="/" className="flex-none w-10">
         <img src={logo} alt="Logo" />
       </Link>

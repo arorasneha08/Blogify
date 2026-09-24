@@ -14,19 +14,21 @@ import LoadMoreDataBtn from "../components/LoadMoreDataBtn";
 import PageNotFound from "./404Page";
 
 export const profileDataStructure = {
-    personal_info : {
-        fullName : "" , 
-        username : "" , 
-        profile_img : "" , 
-        bio : "" , 
+    personal_info: {
+        fullName: "",
+        username: "",
+        profile_img: "",
+        email: "",
+        bio: "",
     },
-    account_info : {
-        total_posts : 0 ,
-        total_blogs : 0, 
+    account_info: {
+        total_posts: 0,
+        total_blogs: 0,
+        total_reads: 0,
     },
-    social_links : {} , 
-    joinedAt : ""
-}
+    social_links: {},
+    joinedAt: "",
+};
 
 const ProfilePage = () => {
 
