@@ -121,7 +121,7 @@ app.post("/signup", async (req, res) => {
             return res.status(403).json({ error: "Invalid Email" });
         }
         if (!passwordRegex.test(password)) {
-            return res.status(403).json({ error: "Password must be 6–20 characters with 1 uppercase, 1 lowercase, and a number" });
+            return res.status(403).json({ error: "Password must be 6-20 characters with 1 uppercase, 1 lowercase, and a number" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -138,6 +138,7 @@ app.post("/signup", async (req, res) => {
 
         const savedUser = await user.save();
         return res.status(200).json({ user: formatDataToSend(savedUser) });
+
 
     } catch (err) {
         if (err.code === 11000) {
@@ -212,6 +213,42 @@ app.post("/google-auth" , async(req, res)=>{
     })
     .catch((err) =>{
         return res.status(500).json({"error" : "Authentication failed using google"})
+    })
+})
+
+app.post("/change-password" , verifyJWT, (req, res) => {
+    let {currentPassword , newPassword} = req.body ; 
+    if(!currentPassword.length || !newPassword.length){
+        return res.status(403).json({error : "All fields are required"}); 
+    }
+    if(!passwordRegex.test(currentPassword) || !passwordRegex.test(newPassword)){
+        return res.status(403).json({error : "Invalid Password"}); 
+    }
+    User.findOne({_id : req.user})
+    .then((user) => {
+        if(user.google_auth){
+            return res.status(403).json({error : "You cannot change password using google auth"}); 
+        }
+        bcrypt.compare(currentPassword , user.personal_info.password, (err, result) => {
+            if(err){
+                return res.status(500).json({error : err.message})
+            }
+            if(!result){
+                return res.status(403).json({error : "Incorrect password"}); 
+            }
+            bcrypt.hash(newPassword, 10 , (err , hashed_password) => {
+                User.findOneAndUpdate({_id : req.user} , {"personal_info.password" : hashed_password})
+                .then((u) => {
+                    return res.status(200).json("Password changed successfully");
+                })
+                .catch((error) => {
+                    return res.status(500).json({error : error.message})
+                })
+            })
+        })
+    })
+    .catch((error) => {
+        return res.status(500).json({error : error.message})
     })
 })
 

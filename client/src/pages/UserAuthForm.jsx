@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate , useNavigate} from "react-router-dom";
 import InputBox from "../components/InputBox";
 import googleIcon from "../imgs/google.png";
 import AnimationWrapper from "../common/page-animation";
@@ -11,7 +11,7 @@ import { UserContext } from "../App";
 import { authWithGoogle } from "../common/firebase";
 
 export default function UserAuthForm({ type }) {
-
+  const navigate = useNavigate();
   const authForm = useRef(); 
   let {userAuth : {access_token} , setUserAuth} = useContext(UserContext); 
   console.log(access_token);
@@ -49,25 +49,83 @@ export default function UserAuthForm({ type }) {
       return toast.error("Password must be 6–20 characters with 1 uppercase, 1 lowercase, and a number");
     }
     userAuthThroughServer(serverRoute , formData); 
+
   }
 
-  const userAuthThroughServer = (serverRoute , formData) =>{
-    axios.post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute , formData)
-    .then(({data}) => {
-      console.log(data);
-      storeInSession("user" , JSON.stringify(data)); 
-      // console.log(sessionStorage);
-      setUserAuth(data); 
+  // const userAuthThroughServer = (serverRoute , formData) =>{
+  //   axios.post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute , formData)
+  //   .then(({data}) => {
+  //     console.log(data);
+  //     storeInSession("user" , JSON.stringify(data)); 
+  //     // console.log(sessionStorage);
+  //     setUserAuth(data); 
+  //   })
+  //   // .catch(({response}) => {
+  //   //   toast.error(response.data.error) ; 
+  //   // })
+  //   .catch((err) => {
+  //     console.error(err);
+  //     const errorMessage = err.response?.data?.error || "An unexpected error occurred.";
+  //     toast.error(errorMessage);
+  //   });
+  // }
+
+  const userAuthThroughServer = (serverRoute, formData) => {
+
+    axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
+        formData
+    )
+    .then(({ data }) => {
+
+        console.log(data);
+
+        // Signup successful
+        if (serverRoute === "/signup") {
+
+            toast.success(
+                "Account registered successfully! Please login."
+            );
+            setTimeout(() => {
+                navigate("/signin");
+            }, 1000);
+            return;
+        }
+
+
+        // Login successful
+        if (
+            serverRoute === "/signin" ||
+            serverRoute === "/google-auth"
+        ) {
+
+            storeInSession(
+                "user",
+                JSON.stringify(data)
+            );
+
+            setUserAuth(data);
+
+            toast.success(
+                "Login successful!"
+            );
+
+        }
+
     })
-    // .catch(({response}) => {
-    //   toast.error(response.data.error) ; 
-    // })
     .catch((err) => {
-      console.error(err);
-      const errorMessage = err.response?.data?.error || "An unexpected error occurred.";
-      toast.error(errorMessage);
+
+        console.error(err);
+
+        const errorMessage =
+            err.response?.data?.error ||
+            "An unexpected error occurred.";
+
+        toast.error(errorMessage);
+
     });
-  }
+
+};
   const handleGoogleAuth = (e) =>{
     e.preventDefault();
     authWithGoogle()
