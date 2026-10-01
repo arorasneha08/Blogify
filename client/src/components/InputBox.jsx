@@ -5,8 +5,9 @@ import { IoKeyOutline } from "react-icons/io5";
 import { FaRegEyeSlash , FaRegEye} from "react-icons/fa";
 import { CiLock, CiUnlock } from "react-icons/ci";
 
-export default function InputBox({ name, type, id, value, placeholder , disable = false}) {
+export default function InputBox({ name, type, id, value, placeholder , disable = false , icon}) {
   const renderIcon = () => {
+    if(icon) return icon; 
     if (name == "fullName") return <FaRegUser className="input-icon" />;
     if (name === "email") return <MdOutlineEmail className="input-icon" />;
     if (name === "password") return <IoKeyOutline className="input-icon" />;

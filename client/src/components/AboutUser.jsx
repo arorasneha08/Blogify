@@ -7,13 +7,13 @@ import { FaFacebook } from "react-icons/fa";
 import { FaTwitter } from "react-icons/fa";
 import { getFullDay } from "../common/date";
 
-const iconMap = {
-    youtube: <FaYoutube />,
-    instagram: <FaInstagram />,
-    facebook : <FaFacebook/>, 
-    twitter : <FaTwitter />, 
-    github: <FaGithub />,
-    website: <CiGlobe />
+export const iconMap = {
+    youtube: <FaYoutube className="input-icon"/>,
+    instagram: <FaInstagram className="input-icon"/>,
+    facebook : <FaFacebook className="input-icon"/>, 
+    twitter : <FaTwitter className="input-icon"/>, 
+    github: <FaGithub className="input-icon"/>,
+    website: <CiGlobe className="input-icon"/>
 };
 
 const AboutUser = ({className , bio , social_links , joinedAt}) => {

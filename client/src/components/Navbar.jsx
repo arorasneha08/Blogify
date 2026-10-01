@@ -7,12 +7,31 @@ import { useContext } from "react";
 import { UserContext } from "../App";
 import { SlBell } from "react-icons/sl";
 import UserNavigationPanel from "./UserNavigationPanel";
+import { useEffect } from "react";
+import axios from "axios";
 
 export default function Navbar() {
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
-  const {userAuth , userAuth : {access_token , profile_img}} = useContext(UserContext); 
+  const {userAuth ,setUserAuth, new_notification_available, userAuth : {access_token , profile_img}} = useContext(UserContext); 
   const[userNavPanel , setUserNavPanel] = useState(false) ; 
   let navigate = useNavigate();
+
+  useEffect(() => {
+
+    if(access_token){
+      axios.get(import.meta.env.VITE_SERVER_DOMAIN + "/new-notification" , {
+        headers : {
+          Authorization : `Bearer ${access_token}`
+        }
+      })
+      .then(({data}) => {
+        setUserAuth({ ...userAuth , ...data})
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    }
+  }, [access_token]); 
 
   const handleUserNavPanel = () =>{
     setUserNavPanel(currentVal => !currentVal);
@@ -36,6 +55,8 @@ export default function Navbar() {
       <Link to="/" className="flex-none w-10">
         <img src={logo} alt="Logo" />
       </Link>
+
+      <p>{new_notification_available}</p>
 
       <div
         className={`
@@ -66,9 +87,15 @@ export default function Navbar() {
 
         {access_token ? 
         <>
-          <Link to="/dashboard/notification">
+          <Link to="/dashboard/notifications">
             <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10 mt-1 text-center">
               <SlBell className="text-2xl ml-3"/>
+              {
+                new_notification_available ? 
+                <span className="bg-red w-3 h-3 rounded-full absolute z-10 top-2 right-2"></span>
+                : "" 
+              }
+              
             </button>
           </Link>
           <div className="relative" onClick={handleUserNavPanel} onBlur={handleBlur}>

@@ -6,7 +6,7 @@ import Loader from "../components/Loader";
 import toast , { Toaster } from "react-hot-toast";
 import InputBox from "../components/InputBox";
 import {profileDataStructure} from "./ProfilePage";
-import iconMap from "../components/AboutUser";
+import {iconMap} from "../components/AboutUser";
 import { CiGlobe } from "react-icons/ci";
 import { uploadImage } from "../common/aws";
 import { storeInSession } from "../common/session";

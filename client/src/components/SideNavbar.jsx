@@ -9,7 +9,7 @@ import { MdLockOutline } from "react-icons/md";
 import { FaBarsStaggered } from "react-icons/fa6";
 
 const SideNavbar = () => {
-    let {userAuth : {access_token}} = useContext(UserContext);
+    let {userAuth : {access_token , new_notification_available}} = useContext(UserContext);
     let page = location.pathname.split("/")[2];
 
     let [pageState , setPageState] = useState(page.replace('-' , ' ')); 
@@ -63,9 +63,13 @@ const SideNavbar = () => {
                         Blogs
                     </NavLink>
 
-                    <NavLink to="/dashboard/notification" onClick={(e) => setPageState(e.target.innerText)} className="sidebar-link">
+                    <NavLink to="/dashboard/notifications" onClick={(e) => setPageState(e.target.innerText)} className="sidebar-link relative">
                         <LuBell />
-                        Notification
+                        {
+                            new_notification_available ? 
+                            <span className="bg-red w-2 h-2 rounded-full absolute z-10 top-1 right-1"></span> : ""
+                        }
+                        Notifications
                     </NavLink>
 
                     <NavLink to="/editor" onClick={(e) => setPageState(e.target.innerText)} className="sidebar-link">
