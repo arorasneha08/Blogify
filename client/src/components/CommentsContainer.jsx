@@ -4,7 +4,7 @@ import { BlogContext } from "../pages/BlogPage";
 import { RxCross1 } from "react-icons/rx";
 import CommentField from "./CommentField";
 import NoDataMessage from "./NoDataMessage";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import CommentCard from "../components/CommentCard";
 
 const CommentsContainer = () => {

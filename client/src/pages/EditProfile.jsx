@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../App";
 import axios from "axios";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import Loader from "../components/Loader";
 import toast , { Toaster } from "react-hot-toast";
 import InputBox from "../components/InputBox";

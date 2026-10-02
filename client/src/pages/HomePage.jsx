@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import InPageNavigation from "../components/InPageNavigation";
 import axios from "axios" ; 
 import Loader from "../components/Loader";

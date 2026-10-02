@@ -1,4 +1,4 @@
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import InputBox from "../components/InputBox";
 import {toast, Toaster} from "react-hot-toast"; 
 import {useContext, useRef} from "react";
@@ -50,7 +50,7 @@ const changePassword = () => {
         <AnimationWrapper>
             <Toaster />
             <form ref={changePasswordForm}>
-                <h1 className="max-wd:hidden">Change Password</h1>
+                <h1 className="max-wd:hidden text-2xl text-dark-grey pt-5">Change Password</h1>
 
                 <div className="py-10 w-full md:max-w-[400px]">
                     <InputBox name="currentPassword" type="password" classname="profile-edit-input" placeholder="Current Password"/>

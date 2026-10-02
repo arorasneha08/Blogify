@@ -1,5 +1,5 @@
 import toast, { Toaster } from "react-hot-toast";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import { RxCross1 } from "react-icons/rx";
 import { useContext } from "react";
 import { EditorContext } from "../pages/Editor";

@@ -9,5 +9,5 @@ export const getDay = (timestamp) => {
 
 export const getFullDay = (timestamp) => {
     let date = new Date(timestamp); 
-    return `${date.getDate()} ${date.getMonth()} ${date.getFullYear()}`
+    return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`
 }

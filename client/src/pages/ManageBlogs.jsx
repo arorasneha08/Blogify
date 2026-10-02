@@ -8,7 +8,7 @@ import { IoSearch } from "react-icons/io5";
 import InPageNavigation from "../components/InPageNavigation";
 import Loader from "../components/Loader";
 import NoDataMessage from "../components/NoDataMessage";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import ManagePublishedBlogCard, { ManageDraftBlogCard } from "../components/ManagePublishedBlogCard";
 import LoadMoreDataBtn from "../components/LoadMoreDataBtn";
 import { useSearchParams } from "react-router-dom";
@@ -119,7 +119,7 @@ const ManageBlogs = () => {
                 <LoadMoreDataBtn state={drafts} fetchDataFunc={getBlogs} additionalParams={{draft :true , deleteDocCount : drafts.deletedDocCount}}/>
                 </>
                 
-                : <NoDataMessage message="No draft blogs."/>
+                : <NoDataMessage message="No draft blogs"/>
             }
         </InPageNavigation>
         </>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import Loader from "../components/Loader";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";

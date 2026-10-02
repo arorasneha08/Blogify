@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import { RiFileEditLine } from "react-icons/ri";
 import { useContext } from "react";
 import { UserContext } from "../App";

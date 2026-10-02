@@ -2,7 +2,7 @@ import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import Loader from "../components/Loader";
 import { getDay } from "../common/date";
 import BlogInteraction from "../components/BlogInteraction";
@@ -127,7 +127,11 @@ export default function BlogPage() {
                         eliminate_blog: blog_id
                     }
                 );
-
+                console.log("Similar blog likes:", similarData.blogs?.map(blog => ({
+                    title: blog.title,
+                    activity: blog.activity,
+                    total_likes: blog.activity?.total_likes
+                })));
                 setSimilarBlogs(similarData.blogs || []);
             } else {
                 setSimilarBlogs([]);

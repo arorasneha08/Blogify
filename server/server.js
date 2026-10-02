@@ -11,7 +11,6 @@ import {getAuth} from "firebase-admin/auth"
 import Notification from './Schema/Notification.js';
 import Comment from './Schema/Comment.js';
 
-// import serviceAccountKey from "./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json" assert {type : json}
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const serviceAccountKey = require("./blog-platform-4f473-firebase-adminsdk-fbsvc-1fce8f594e.json");
@@ -425,7 +424,7 @@ app.post("/search-blogs" , (req, res) => {
 
     Blog.find(findQuery)
     .populate("author" , "personal_info.profile_img personal_info.username personal_info.fullName -_id")
-    .select("blog_id title des banner tags publishedAt -_id")
+    .select("blog_id title des banner tags publishedAt activity -_id")
     .skip((page - 1) * maxLimit)
     .limit(maxLimit)
     .then(blogs => {
@@ -626,436 +625,162 @@ app.post("/isliked-by-user" , verifyJWT , (req, res) => {
 
 
 app.post("/add-comment", verifyJWT, async (req, res) => {
-
     try {
-
         const user_id = req.user;
-
-
-        const {
-            _id,
-            comment,
-            replying_to,
-            blog_author, 
-            notification_id
-        } = req.body;
-
-
+        const {_id, comment, replying_to, blog_author, notification_id} = req.body;
+        
         if (!_id) {
-
             return res.status(400).json({
-
-                error:
-                    "Blog ID is required"
-
+                error: "Blog ID is required"
             });
-
         }
-
-
         if (!comment || !comment.trim()) {
-
             return res.status(403).json({
-
-                error:
-                    "You must provide a comment"
-
+                error: "You must provide a comment"
             });
-
         }
-
-
-        /*
-            Create comment/reply
-        */
-
         const commentObj = new Comment({
-
             blog_id: _id,
-
             blog_author,
-
-            comment:
-                comment.trim(),
-
-            commented_by:
-                user_id,
-
-            isReply:
-                Boolean(replying_to),
-
-            parent:
-                replying_to || null
-
+            comment: comment.trim(),
+            commented_by: user_id,
+            isReply: Boolean(replying_to),
+            parent: replying_to || null
         });
-
-
-        const commentFile =
-            await commentObj.save();
-
-
-        /*
-            Add comment to blog
-        */
+        const commentFile = await commentObj.save();
 
         const blog =
             await Blog.findOneAndUpdate(
-
                 { _id },
-
                 {
-
                     $push: {
-
-                        comments:
-                            commentFile._id
-
+                        comments: commentFile._id
                     },
-
                     $inc: {
-
-                        "activity.total_comments":
-                            1,
-
-                        "activity.total_parent_comments":
-                            replying_to
-                                ? 0
-                                : 1
-
+                        "activity.total_comments": 1,
+                        "activity.total_parent_comments": replying_to ? 0 : 1
                     }
-
                 },
-
                 {
                     new: true
                 }
-
             );
-
 
         if (!blog) {
-
             return res.status(404).json({
-
-                error:
-                    "Blog not found"
-
+                error: "Blog not found"
             });
-
         }
-
-
-        /*
-            If this is a reply,
-            add it to parent's children.
-        */
 
         if (replying_to) {
-
             await Comment.findByIdAndUpdate(
-
                 replying_to,
-
                 {
-
                     $push: {
-
-                        children:
-                            commentFile._id
-
+                        children: commentFile._id
                     }
-
                 }
-
             );
-
         }
-
-
-        /*
-            Notification
-        */
-
         const notification =
             new Notification({
-
-                type:
-                    replying_to
-                        ? "reply"
-                        : "comment",
-
-                blog:
-                    _id,
-
-                notification_for:
-                    blog.author,
-
-                user:
-                    user_id,
-
-                comment:
-                    commentFile._id
-
+                type: replying_to ? "reply" : "comment",
+                blog: _id,
+                notification_for: blog.author,
+                user: user_id,
+                comment: commentFile._id
             });
-
 
         if (replying_to) {
-
-            notification.replied_on_comment =
-                replying_to;
-
-
-            const parentComment =
-                await Comment
-                    .findById(
-                        replying_to
-                    )
-                    .select(
-                        "commented_by"
-                    );
-
+            notification.replied_on_comment = replying_to;
+            const parentComment = await Comment.findById(replying_to).select("commented_by");
 
             if (parentComment) {
-
-                notification.notification_for =
-                    parentComment.commented_by;
-
+                notification.notification_for = parentComment.commented_by;
             }
-
         }
-
-
         await notification.save();
 
-
-        /*
-            Populate user information
-        */
-
-        const populatedComment =
-            await Comment
-                .findById(
-                    commentFile._id
-                )
-                .populate(
-
-                    "commented_by",
-
-                    "personal_info.fullName personal_info.username personal_info.profile_img"
-
-                );
-
-
-        /*
-            Count replies
-        */
+        const populatedComment = await Comment.findById(commentFile._id).populate("commented_by", "personal_info.fullName personal_info.username personal_info.profile_img");
 
         const replyCount =
-            await Comment.countDocuments({
-
-                parent:
-                    commentFile._id,
-
-                isReply: true
-
-            });
-
+            await Comment.countDocuments({ parent:commentFile._id,isReply: true});
 
         return res.status(200).json({
-
-            comment:
-                populatedComment.comment,
-
-            commentedAt:
-                populatedComment.commentedAt,
-
-            _id:
-                populatedComment._id,
-
-            commented_by:
-                populatedComment.commented_by,
-
-            children:
-                populatedComment.children ||
-                [],
-
-            isReply:
-                populatedComment.isReply,
-
-            parent:
-                populatedComment.parent,
-
+            comment: populatedComment.comment,
+            commentedAt: populatedComment.commentedAt,
+            _id: populatedComment._id,
+            commented_by: populatedComment.commented_by,
+            children: populatedComment.children || [],
+            isReply: populatedComment.isReply,
+            parent: populatedComment.parent,
             replyCount
-
         });
-
-
-    } catch (err) {
-
-        console.error(
-            "ADD COMMENT ERROR:",
-            err
-        );
-
-
+    } 
+    catch (err) {
+        console.error("ADD COMMENT ERROR:", err);
         return res.status(500).json({
-
-            error:
-                err.message
-
+            error:err.message
         });
-
     }
-
 });
 
 app.post("/get-comment-replies", async (req, res) => {
-
     try {
-
-        const {
-            comment_id,
-            skip = 0
-        } = req.body;
-
+        const {comment_id, skip = 0 } = req.body;
 
         if (!comment_id) {
-
             return res.status(400).json({
-
-                error:
-                    "Comment ID is required"
-
+                error: "Comment ID is required"
             });
-
         }
 
-
         const max_limit = 5;
+        const totalReplies = await Comment.countDocuments({ parent: comment_id, isReply: true });
 
-
-        const totalReplies =
-            await Comment.countDocuments({
-
-                parent: comment_id,
-
-                isReply: true
-
-            });
-
-
-        const replies =
-            await Comment
-                .find({
-
+        const replies = await Comment.find({
                     parent: comment_id,
-
                     isReply: true
-
                 })
-                .populate(
-
-                    "commented_by",
-
-                    "personal_info.fullName personal_info.username personal_info.profile_img"
-
-                )
+                .populate("commented_by","personal_info.fullName personal_info.username personal_info.profile_img")
                 .skip(Number(skip))
                 .limit(max_limit)
                 .sort({
-
                     commentedAt: 1
-
                 });
-
-
-        /*
-            Get reply counts for loaded
-            replies as well.
-        */
 
         const repliesWithCount =
             await Promise.all(
-
                 replies.map(
                     async (reply) => {
-
-                        const replyCount =
-                            await Comment.countDocuments({
-
-                                parent:
-                                    reply._id,
-
-                                isReply: true
-
-                            });
-
-
+                        const replyCount = await Comment.countDocuments({parent: reply._id, isReply: true});
                         return {
-
                             ...reply.toObject(),
-
                             replyCount
-
                         };
-
                     }
                 )
-
             );
-
-
-        const newSkip =
-            Number(skip) +
-            repliesWithCount.length;
-
+        const newSkip = Number(skip) + repliesWithCount.length;
 
         return res.status(200).json({
-
-            replies:
-                repliesWithCount,
-
+            replies: repliesWithCount,
             totalReplies,
-
-            hasMoreReplies:
-                newSkip < totalReplies
-
+            hasMoreReplies: newSkip < totalReplies
         });
-
-
     } catch (err) {
-
-        console.error(
-            "GET COMMENT REPLIES ERROR:",
-            err
-        );
-
-
         return res.status(500).json({
-
-            error:
-                err.message
-
+            error: err.message
         });
-
     }
-
 });
 
 app.post("/get-blog-comments", async (req, res) => {
-
     try {
-
-        const {
-            blog_id,
-            skip = 0
-        } = req.body;
-
+        const {blog_id, skip = 0 } = req.body;
         const max_limit = 5;
 
-
-        const comments =
-            await Comment
+        const comments =await Comment
                 .find({
                     blog_id,
                     isReply: false
@@ -1070,65 +795,27 @@ app.post("/get-blog-comments", async (req, res) => {
                     commentedAt: -1
                 });
 
-
-        /*
-            Get reply count for
-            every parent comment.
-        */
-
         const commentsWithReplyCount =
             await Promise.all(
-
                 comments.map(
                     async (comment) => {
-
-                        const replyCount =
-                            await Comment.countDocuments({
-                                parent:
-                                    comment._id,
-                                isReply: true
-                            });
-
-
+                        const replyCount = await Comment.countDocuments({ parent: comment._id, isReply: true});
                         return {
-
                             ...comment.toObject(),
-
                             replyCount
-
                         };
-
                     }
                 )
-
             );
-
-
         return res.status(200).json({
-
-            comments:
-                commentsWithReplyCount
-
+            comments: commentsWithReplyCount
         });
-
 
     } catch (err) {
-
-        console.error(
-            "GET BLOG COMMENTS ERROR:",
-            err
-        );
-
-
         return res.status(500).json({
-
-            error:
-                err.message
-
+            error: err.message
         });
-
     }
-
 });
 
 app.get("/new-notification" , verifyJWT, (req, res) => {

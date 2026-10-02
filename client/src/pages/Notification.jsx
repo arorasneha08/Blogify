@@ -2,7 +2,7 @@ import { useState } from "react";
 import { UserContext } from "../App";
 import { useContext } from "react";
 import { FilterPaginationData } from "../common/FilterPaginationData";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import NoDataMessage from "../components/NoDataMessage";
 import NotificationCard from "../components/NotificationCard";
 import { useEffect } from "react";

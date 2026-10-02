@@ -1,7 +1,7 @@
 import { Link, Navigate , useNavigate} from "react-router-dom";
 import InputBox from "../components/InputBox";
 import googleIcon from "../imgs/google.png";
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import {Toaster , toast} from "react-hot-toast"
 import axios from "axios" ; 
 import { storeInSession } from "../common/session";

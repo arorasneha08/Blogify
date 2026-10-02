@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import logo from "../imgs/logo.png"
-import AnimationWrapper from "../common/page-animation";
+import AnimationWrapper from "../common/PageAnimation";
 import defaultBanner from "../imgs/blog banner.png"
 import { uploadImage } from "../common/aws";
 import {Toaster , toast} from "react-hot-toast"; 
