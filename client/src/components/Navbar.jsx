@@ -1,4 +1,4 @@
-import logo from "../imgs/logo.png";
+import icon from "../imgs/icon.jpg";
 import { Link , Outlet, useNavigate} from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { useState } from "react";
@@ -52,8 +52,8 @@ export default function Navbar() {
   return (
     <>
     <nav className="navbar flex items-center p-4 sticky top-0 z-50">
-      <Link to="/" className="flex-none w-10">
-        <img src={logo} alt="Logo" />
+      <Link to="/" className="flex-none w-10 text-2xl">
+        <h1 className="ml-2 font-edu-qld-hand font-bold p-2">Blogger</h1>
       </Link>
 
       <p>{new_notification_available}</p>
@@ -65,7 +65,7 @@ export default function Navbar() {
           md:block
           `}
           >
-        <div className="relative">
+        <div className="relative ml-5">
           <input
             type="text"
             placeholder="Search"

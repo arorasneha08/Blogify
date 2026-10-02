@@ -27,7 +27,8 @@ export default {
         extend: {
             fontFamily: {
               inter: ["'Inter'", "sans-serif"],
-              gelasio: ["'Gelasio'", "serif"]
+              gelasio: ["'Gelasio'", "serif"],
+              "edu-qld-hand": ["Edu QLD Hand", "cursive"],
             },
         },
 
