@@ -146,10 +146,11 @@ const BlogEditor = () =>{
         <>
         <Toaster position="top-center" reverseOrder={false} />
             <nav className="navbar">
-                <Link to="/" className="flex-none w-10">
-                    <img src={logo}/>
+                <Link to="/" className="flex-none w-10 text-2xl">
+                    {/* <img src={logo}/> */}
+                    <h1 className="ml-2 font-edu-qld-hand font-bold p-2">Blogger</h1>
                 </Link>
-                <p className="max-md:hidden text-black line-clamp-1 w-full">
+                <p className="max-md:hidden text-black line-clamp-1 w-full text-center text-xl">
                     {title.length ? title : "New Blog" }
                 </p>
                 <div className="flex gap-4 ml-auto ">
