@@ -5,9 +5,12 @@ export let activeTabRef ;
 
 export default function InPageNavigation({routes , defaultHidden = [],defaultActiveIdx = 0 , children}) {
     let [InPageNavIndex , setInPageNavIndex] = useState(defaultActiveIdx); 
+    let [width , setWidth] = useState(window.innerWidth) ;
+    let [isResizeEventAdded, setIsResizeEventAdded] = useState(false) ;
+    
     activetabLineRef = useRef();
     activeTabRef = useRef(); 
-
+    
     // on clicking onn the tab the black line shifts 
     const changePageState = (btn , i) => {
         console.log(btn, i);
@@ -17,8 +20,19 @@ export default function InPageNavigation({routes , defaultHidden = [],defaultAct
         setInPageNavIndex(i); 
     }
     useEffect(() => {
-        changePageState(activeTabRef.current, defaultActiveIdx); 
-    }, [])
+        if(width > 766  && InPageNavIndex != defaultActiveIdx){
+            changePageState(activeTabRef.current, defaultActiveIdx);   
+        }
+
+        if(!isResizeEventAdded){
+            window.addEventListener("resize" , () => {
+                if(!isResizeEventAdded){
+                    setIsResizeEventAdded(true) ; 
+                }
+                setWidth(window.innerWidth)
+            })
+        }
+    }, [width])
 
     return (
     <>

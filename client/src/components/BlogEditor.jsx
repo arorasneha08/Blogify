@@ -126,10 +126,11 @@ const BlogEditor = () =>{
                 })
                 .then(() => {
                     e.target.classList.remove("disable"); 
+                    toast.dismiss(loadingToast);
                     toast.success("Saved 👍");
 
                     setTimeout(() => {
-                        navigate("/"); 
+                        navigate("/dashboard/blogs?tab=drafts"); 
                     } , 500); 
                 })
                 .catch(({response }) => {
